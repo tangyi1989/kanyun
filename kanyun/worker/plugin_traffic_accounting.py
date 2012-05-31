@@ -80,6 +80,14 @@ def get_traffic_accounting_info():
 
 # acct_records:
 # ['[161:10604] -A nova-compute-f-inst-240 -o eth0 -m comment --comment " 240 10.42.1.0 accounting rule " -j ACCEPT']
+
+# rawdata:
+#['[0:0]', '-A', 'nova-compute-f-inst-95', '-o', 'br100', '-m', 'comment', '--comment', '"', '95', '10.30.0.15', 'accounting', 'rule', '"']
+
+#------------------------------ traffic ------------------------------
+#{'95@sws-qd-10': ('10.30.0.15', 1338449763, '0.0'), '10.30.0.15@sws-qd-10': ('accounting', 1338449763, '0.0')}
+
+
     for record in acct_records:
         rawdata = record.split()
         out_bytes = rawdata[0].partition(':')[2][0:-1]
