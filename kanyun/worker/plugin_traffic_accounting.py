@@ -75,12 +75,16 @@ def get_traffic_accounting_info():
     lines = records.splitlines()[2:]
     acct_records = [line for line in lines if "accounting rule" in line]
     
+    # ACCEPT     all  --  0.0.0.0/0            0.0.0.0/0            /*  240 10.42.1.0 accounting rule  */
     ret = dict()
 
+# acct_records:
+# ['[161:10604] -A nova-compute-f-inst-240 -o eth0 -m comment --comment " 240 10.42.1.0 accounting rule " -j ACCEPT']
     for record in acct_records:
-        out_bytes = record.split()[0].partition(':')[2][0:-1]
-        instance_id = record.split()[9] + hostname
-        instance_ip = record.split()[10]
+        rawdata = record.split()
+        out_bytes = rawdata[0].partition(':')[2][0:-1]
+        instance_id = rawdata[9] + hostname
+        instance_ip = rawdata[10]
 
         # Is total out bytes(sum of history)
         val = float(out_bytes)

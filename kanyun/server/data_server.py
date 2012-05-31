@@ -115,7 +115,41 @@ def list_workers():
     for worker_id, ls in living_status.iteritems():
         print 'worker', worker_id, "update @", ls.update_time
     print len(living_status), "workers."
+
+
+def get_prefix(data, s='@'):
+    try: 
+        prefix = a.split(s)[0]
+        return prefix
+    except:
+        pass
+        
+    return None
     
+def isnum_prefix(data):
+    ret = get_prefix(data, "@")
+        
+    return not ret is None
+
+def check_id(data):
+    # 1.test format
+    # 2-1 is 'instance-0000001' format
+    if len(data) > 9 and data[:9] == "instance-":
+        instance_uuid = tool.get_uuid_by_novaid(data_id)
+    elif isnum_prefix(data):
+        # 2-2 is 'id' format
+        id = get_prefix(data, "@")
+        instance_uuid = tool.get_uuid_by_id(int(id))
+    else:
+        instance_uuid = None
+#    # 2-3 is '10.0.0.1' format
+#    instance_uuid = tool.get_uuid_by_ip(data_id)
+    
+#    if instance_uuid is None:
+#        instance_uuid = data_id
+#        print "Invalid instance_id format:", data_id
+    
+    return instance_uuid
     
 def plugin_heartbeat(app, db, data):
     if data is None or len(data) < 3:
@@ -158,14 +192,15 @@ def plugin_decoder_traffic_accounting(app, db, data):
 #        # instance_uuid = tool.get_uuid_by_novaid(nova_id)
 #        if len(i) > 0 and len(data[i]) > 2:
 #            db.insert('vmnetwork', i, {data[i][0]: {data[i][1]: data[i][2]}})
-    for nova_id, i in data.iteritems():
-        instance_uuid = tool.get_uuid_by_novaid(nova_id)
-        if instance_uuid is None:
-            instance_uuid = nova_id
-            print "Invalid instance_id format:", nova_id
+    for data_id, i in data.iteritems():
+        instance_uuid = check_id(data_id)
+#        instance_uuid = tool.get_uuid_by_novaid(data_id)
+#        if instance_uuid is None:
+#            instance_uuid = data_id
+#            print "Invalid instance_id format:", data_id
         if len(i) > 2:
             traffic = i[2]
-            print nova_id, "-->", instance_uuid, "\033[1;32m", traffic, "\033[0m"
+            print data_id, "-->", instance_uuid, "\033[1;32m", traffic, "\033[0m"
             db.insert('vmnetwork', instance_uuid, {i[0]: {i[1]: traffic}})
     print 'spend \033[1;33m%f\033[0m seconds' % (time.time() - pass_time)
 

@@ -25,7 +25,13 @@ import pycassa
 from collections import OrderedDict
 
 from kanyun.server.data_server import *
+from kanyun.common.app import *
 
+class DbMox():
+    def __init__(self):
+        pass
+    def insert(self, a=None,b=None,c=None,d=None,e=None):
+        pass
 
 class TestLivingStatus(unittest.TestCase):
 
@@ -71,19 +77,27 @@ class TestDataServer(unittest.TestCase):
         time.clock()
         db = None
         data = None
+        app = App(conf="kanyun.conf")
         autotask_heartbeat()
         clean_die_warning()
         list_workers()
-        plugin_heartbeat(db, data)
-        plugin_decoder_agent(db, data)
-        plugin_decoder_traffic_accounting(db, data)
+        plugin_heartbeat(app, db, data)
+        plugin_decoder_agent(app, db, data)
+        plugin_decoder_traffic_accounting(app, db, data)
         print "DataServerFunc test \t[\033[1;33mOK\033[0m]"
+        
+    def testPluginDecoderTrafficAccounting(self):
+        app = App(conf="kanyun.conf")
+        data = {'240@venus-133': ('10.0.0.2', 1332409327, '0')}
+        db = DbMox()
+        plugin_decoder_traffic_accounting(app, db, data)
 
 
 if __name__ == '__main__':
     time.clock()
     ApiTestSuite = unittest.TestSuite()
     ApiTestSuite.addTest(TestLivingStatus("testLivingStatusFunc"))
+    ApiTestSuite.addTest(TestDataServer("testPluginDecoderTrafficAccounting"))
     ApiTestSuite.addTest(TestDataServer("testDataServerFunc"))
 
     

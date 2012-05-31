@@ -145,10 +145,11 @@ class Worker:
             return False
         return self.last_work_min <> time.localtime().tm_min
         
-    def info_push(self):
+    def info_push(self, check_worktime=True):
         """Do the work: if is time to work ,get and send the vms's sysinfo"""
-        if not self.is_timeto_work():
-            return False
+        if check_worktime:
+            if not self.is_timeto_work():
+                return False
         now = time.localtime()
         self.logger.debug('%02d:%02d:%02d working...' % (now[3], now[4], now[5]))
 

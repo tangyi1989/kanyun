@@ -52,15 +52,24 @@ def register_signal():
 def main():
     global running
     if len(sys.argv) == 2 and sys.argv[1] == '--help':
-        print 'usage:\nuse speical id: worker <id>\nuse id in config file: worker'
+        print 'usage:'
+        print '\tkanyun-worker'
+        print '\tkanyun-worker -1'
+        print '\tuse speical id: worker <id>'
+        print '\tuse id in config file: worker'
         return
     
     wid = None
+    check_worktime = True
     if len(sys.argv) == 2:
-        if len(sys.argv[1]) > 16:
+        if sys.argv[1] == '-1':
+            running = False
+            check_worktime = False
+        elif len(sys.argv[1]) > 16:
             print 'Invalid worker id.'
             return
-        wid = sys.argv[1]
+        else:
+            wid = sys.argv[1]
     
     register_signal()
 
@@ -73,14 +82,14 @@ def main():
     print "Starting worker..."
     print "id=%s" % (worker.worker_id)
 
-    while running:
+    while True:
         time.sleep(worker.working_rate/1000)
+        
+        # push the info data to data-server
+        worker.info_push(check_worktime = check_worktime)
         
         if not running:
             break
             
-        # push the info data to data-server
-        worker.info_push()
-        
 if __name__ == '__main__':
     main()

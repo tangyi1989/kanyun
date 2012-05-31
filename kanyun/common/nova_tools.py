@@ -35,6 +35,16 @@ class NovaTools():
         self.db.echo = False
         metadata = MetaData(self.db)
         self.instances = Table('instances', metadata, autoload=True)
+
+    def get_uuid_by_ip(self, ip):
+        return None
+        
+    def get_uuid_by_id(self, id):
+        ret = self.get_instances(id=id)
+        if ret is None:
+            return None
+            
+        return ret[1]
         
     def get_uuid_by_novaid(self, instance):
         ret = self.get_id(instance)
