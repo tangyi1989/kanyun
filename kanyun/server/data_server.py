@@ -119,17 +119,20 @@ def list_workers():
 
 def get_prefix(data, s='@'):
     try: 
-        prefix = a.split(s)[0]
+        prefix = data.split(s)[0]
         return prefix
-    except:
-        pass
+    except Exception, e:
+        print Exception, e
         
     return None
     
 def isnum_prefix(data):
     ret = get_prefix(data, "@")
-        
-    return not ret is None
+    try:
+        _ = int(ret)
+    except:
+        return False
+    return True
 
 def check_id(data):
     # 1.test format
@@ -141,13 +144,9 @@ def check_id(data):
         id = get_prefix(data, "@")
         instance_uuid = tool.get_uuid_by_id(int(id))
     else:
-        instance_uuid = None
+        instance_uuid = data
 #    # 2-3 is '10.0.0.1' format
 #    instance_uuid = tool.get_uuid_by_ip(data_id)
-    
-#    if instance_uuid is None:
-#        instance_uuid = data_id
-#        print "Invalid instance_id format:", data_id
     
     return instance_uuid
     
