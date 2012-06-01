@@ -200,7 +200,7 @@ def plugin_decoder_traffic_accounting(app, db, data):
         if len(i) > 2:
             traffic = i[2]
             print data_id, "-->", instance_uuid, "\033[1;32m", traffic, "\033[0m"
-            db.insert('vmnetwork', instance_uuid, {i[0]: {i[1]: traffic}})
+            db.insert('vmnetwork', instance_uuid, {"total": {i[1]: traffic}})
     print 'spend \033[1;33m%f\033[0m seconds' % (time.time() - pass_time)
 
 def SignalHandler(sig, id):

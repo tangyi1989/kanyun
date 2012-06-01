@@ -278,7 +278,10 @@ class ApiServer():
         
         row_id = args['id']
         cf_str = args['metric']
-        scf_str = args['metric_param']
+        if args.has_key("metric_param"):
+            scf_str = args['metric_param']
+        else:
+            scf_str = "total"
         statistic = args['statistic']
         period = int(args['period'])
         timestamp_from = args['timestamp_from']
