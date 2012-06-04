@@ -112,7 +112,7 @@ class Worker:
     
     def update_time(self):
         """[private]save the current time.First update will between 0-5(sec) in current minutes"""
-        localtime = time.localtime()
+        localtime = time.gmtime()
         if self.last_work_min is None:
             if localtime.tm_sec >= 0 and localtime.tm_sec <= 5:
                 self.last_work_min = localtime.tm_min - 1
@@ -129,7 +129,7 @@ class Worker:
     
     def get_leaving_time(self):
         """return leaving seconds before next work time"""
-        ret = 60 - time.localtime().tm_sec
+        ret = 60 - time.gmtime().tm_sec
         return ret
         
     def is_timeto_work(self):
@@ -143,14 +143,14 @@ class Worker:
 
         if self.last_work_min is None:
             return False
-        return self.last_work_min <> time.localtime().tm_min
+        return self.last_work_min <> time.gmtime().tm_min
         
     def info_push(self, check_worktime=True):
         """Do the work: if is time to work ,get and send the vms's sysinfo"""
         if check_worktime:
             if not self.is_timeto_work():
                 return False
-        now = time.localtime()
+        now = time.gmtime()
         self.logger.debug('%02d:%02d:%02d working...' % (now[3], now[4], now[5]))
 
         for (plugin, enable) in self.plugins:

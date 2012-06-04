@@ -70,6 +70,7 @@ if __name__ == '__main__':
             if not msg.has_key('method') or not msg.has_key("args"):
                 socket.send_multipart([msg_type, msg_uuid, json.dumps(data)])
                 continue
+            logger.info(msg['method'] + str(msg['args']))
             data = on_message_receive(api, msg['method'], msg['args'])
             if data is None:
                 data = dict()

@@ -18,13 +18,13 @@
 
 import sys
 import time
-import iso8601
 import types
 import json
 import logging
 import traceback
 import ConfigParser
 import zmq
+from dateutil.parser import parse
 from collections import OrderedDict
 from kanyun.common.const import *
 from kanyun.common.buffer import HallBuffer
@@ -174,12 +174,12 @@ class ApiServer():
             key = rt.tm_min + rt.tm_hour*100 + rt.tm_mday*10000 + \
                   rt.tm_mon*1000000 + rt.tm_year*100000000
             if t == 0:
-                print '\tget first value'
+#                print '\tget first value'
                 st.clean()
                 t = timestmp
                 key_time = time.gmtime(timestmp)
             if timestmp >= t + period*60:
-                print '\tnext', key, ">=", t, "+", period
+#                print '\tnext', key, ">=", t, "+", period
                 st.clean()
                 t = timestmp
                 key_time = time.gmtime(timestmp)
@@ -188,8 +188,8 @@ class ApiServer():
                               (key_time.tm_year, key_time.tm_mon, key_time.tm_mday,
                               key_time.tm_hour, key_time.tm_min,0,0,0,0))
             this_period[key2] = st.get_value(statistic)
-            print '\tcompute time=%d, value=%s(%f) "update(%s)=%d"' % \
-                    (key, value, float(value), key2, this_period[key2])
+#            print '\tcompute time=%d, value=%s(%f) "update(%s)=%d"' % \
+#                    (key, value, float(value), key2, this_period[key2])
                 
         this_period = OrderedDict(sorted(this_period.items(), key=lambda t: t[0]))
         print statistic, ":each period(", period, "):"
@@ -275,7 +275,7 @@ class ApiServer():
 #        datetime_to = iso8601.parse_date(timestamp_to)
 #        # TODO: implement
 #        return {'data': usage_report}
-        
+
         row_id = args['id']
         cf_str = args['metric']
         if args.has_key("metric_param"):
@@ -286,11 +286,15 @@ class ApiServer():
         period = int(args['period'])
         timestamp_from = args['timestamp_from']
         timestamp_to = args['timestamp_to']
-        time_from = iso8601.parse_date(timestamp_from)
+#        time_from = iso8601.parse_date(timestamp_from)
+#        time_from = int(time.mktime(time_from.timetuple()))
+        time_from = parse(timestamp_from)
         time_from = int(time.mktime(time_from.timetuple()))
         time_to = int(time.time())
         if not timestamp_to is None:
-            time_to = iso8601.parse_date(timestamp_to)
+#            time_to = iso8601.parse_date(timestamp_to)
+#            time_to = int(time.mktime(time_to.timetuple()))
+            time_to = parse(timestamp_to)
             time_to = int(time.mktime(time_to.timetuple()))
             
         bufkey = str([row_id, cf_str, scf_str, 
