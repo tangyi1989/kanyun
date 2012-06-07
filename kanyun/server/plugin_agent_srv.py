@@ -81,14 +81,13 @@ def parse_single(db, raw_cf_str, instance_id, value, keypath, scf_str):
     prekey = keypath + '/' + cf_str + '/' + scf_str
     if cf_str in ['cpu']:
         val1 = value[1] # cpu_usage
-        print "\tID=%s cpu usage=\033[1;32m%.02f%%\033[0m" \
-               % (instance_id, float(val1))
+        print "\tcpu=\033[1;32m%.02f%%\033[0m time=%f" \
+               % (float(val1), value[0])
     else:
         val1 = get_change(prekey, value[1])
     
     previous_data[prekey + '/1'] = (value[1], val1, instance_id, cf_str, scf_str)
     db.insert(cf_str, instance_id, {scf_str: {int(value[0]): str(val1)}})
-    #print '\tbuf %s saved:key=%s, cf=%s' % (prekey + '/1', instance_id, cf_str)
     return [
         (cf_str, instance_id, {scf_str: {int(value[0]): str(val1)}})
         ]
@@ -115,7 +114,7 @@ def parse_multi(db, raw_cf_str, instance_id, value, keypath, scf_str):
         previous_data[prekey2] = (value[2], val2, instance_id, cf_str2, scf_str)
     db.insert(cf_str1, instance_id, {scf_str: {int(value[0]): str(val1)}})
     db.insert(cf_str2, instance_id, {scf_str: {int(value[0]): str(val2)}})
-    print '\t%s=\033[1;32m%s\033[0m saved\n\t%s=\033[1;32m%s\033[0m saved' \
+    print '\t%s=\033[1;32m%s\033[0m\n\t%s=\033[1;32m%s\033[0m' \
             % (prekey1, str(val1), prekey2, str(val2))
     #print '\tkey=%s, cf=%s/%s 2 records saved' % (instance_id, cf_str1, cf_str2)
     return [

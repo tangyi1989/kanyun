@@ -140,7 +140,8 @@ class ApiServer():
             
         if time_to == 0:
             time_to = int(time.time())
-            
+        print "get_data:", row_id, cf_str, scf_str, time_from, time_to
+        
         bufkey = str([row_id, cf_str, scf_str, time_from, time_to])
         if self.buf.hit_test(bufkey):
             return self.buf.get_buf(bufkey)
@@ -156,10 +157,11 @@ class ApiServer():
         
         return ret
         
-    def analyize_data(self, rs, period, statistic):
+    def analyize_data(self, rs, period, statistic, show=False):
         """[private func]analyize the data
         period: minutes
         return: {"key":"value"}
+        note: timestmp is already UTC time, so do NOT use time.gmtime again
         """
         if rs is None \
             or not isinstance(period, int):
@@ -170,34 +172,32 @@ class ApiServer():
         this_period = dict()
         
         for timestmp, value in rs.iteritems():
-            rt = time.gmtime(timestmp)
+            rt = time.localtime(timestmp)
             key = rt.tm_min + rt.tm_hour*100 + rt.tm_mday*10000 + \
                   rt.tm_mon*1000000 + rt.tm_year*100000000
             if t == 0:
-#                print '\tget first value'
                 st.clean()
                 t = timestmp
-                key_time = time.gmtime(timestmp)
+                key_time = time.localtime(timestmp)
             if timestmp >= t + period*60:
-#                print '\tnext', key, ">=", t, "+", period
                 st.clean()
                 t = timestmp
-                key_time = time.gmtime(timestmp)
+                key_time = time.localtime(timestmp)
             st.update(float(value))
             key2 = time.mktime(
                               (key_time.tm_year, key_time.tm_mon, key_time.tm_mday,
                               key_time.tm_hour, key_time.tm_min,0,0,0,0))
             this_period[key2] = st.get_value(statistic)
-#            print '\tcompute time=%d, value=%s(%f) "update(%s)=%d"' % \
-#                    (key, value, float(value), key2, this_period[key2])
                 
         this_period = OrderedDict(sorted(this_period.items(), key=lambda t: t[0]))
-        print statistic, ":each period(", period, "):"
+        if show:
+            print statistic, ":each period(", period, "):"
         for m, val in this_period.iteritems():
-            rt = time.gmtime(m)
+            rt = time.localtime(m)
             key = rt.tm_min + rt.tm_hour*100 + rt.tm_mday*10000 + \
                   rt.tm_mon*1000000 + rt.tm_year*100000000
-            print '\t', key, m, val
+            if show:
+                print '\t', key, m, val
             
         return this_period
 
@@ -215,7 +215,6 @@ class ApiServer():
         rs = db.get_range2(cf_str, row_count=20)
         return list(rs)
         if not rs is None:
-            print rs
             for i in rs:
                 ret.append(i[0])
         
@@ -278,10 +277,7 @@ class ApiServer():
 
         row_id = args['id']
         cf_str = args['metric']
-        if args.has_key("metric_param"):
-            scf_str = args['metric_param']
-        else:
-            scf_str = "total"
+        scf_str = args.setdefault("metric_param", "total")
         statistic = args['statistic']
         period = int(args['period'])
         timestamp_from = args['timestamp_from']
@@ -299,6 +295,7 @@ class ApiServer():
             
         bufkey = str([row_id, cf_str, scf_str, 
                       statistic, period, time_from, time_to])
+        print "query_usage_report time range:", time_from, time_to
         if self.buf.hit_test(bufkey):
             print "buffer hit:", bufkey
             return self.buf.get_buf(bufkey)
@@ -308,7 +305,7 @@ class ApiServer():
                                           time_from, time_to)
         if not rs is None and count > 0:
             buf = self.analyize_data(rs, 1, statistic)
-            ret = self.analyize_data(buf, period, statistic)
+            ret = self.analyize_data(buf, period, statistic, show=True)
             if ret is None:
                 ret_len = 0
             else:
@@ -352,7 +349,7 @@ class ApiServer():
                                           time_from, time_to)
         if not rs is None and count > 0:
             buf = self.analyize_data(rs, 1, statistic)
-            ret = self.analyize_data(buf, period, statistic)
+            ret = self.analyize_data(buf, period, statistic, show=True)
             if ret is None:
                 ret_len = 0
             else:

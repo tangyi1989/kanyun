@@ -29,8 +29,7 @@ class App():
             
         try:
             cfg = dict(self.config.items('log'))
-            if cfg.has_key('file'):
-                self.log_file = cfg['file']
+            self.log_file = cfg.setdefault("file", log)
         except ConfigParser.NoSectionError:
             cfg = None
 

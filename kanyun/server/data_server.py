@@ -155,10 +155,12 @@ def plugin_heartbeat(app, db, data):
         logger.debug("[ERR]invalid heartbeat data")
         return
     worker_id, update_time, status = data
-    if living_status.has_key(worker_id):
-        living_status[worker_id].update()
-    else:
-        living_status[worker_id] = LivingStatus(worker_id)
+#    if living_status.has_key(worker_id):
+#        living_status[worker_id].update()
+#    else:
+#        living_status[worker_id] = LivingStatus(worker_id)
+    living_state = living_status.setdefault(worker_id, LivingStatus(worker_id))
+    living_state.update()
     logger.debug("heartbeat:%s" % data)
     if 0 == status:
         logger.debug("%s quited" % (worker_id))
@@ -199,7 +201,7 @@ def plugin_decoder_traffic_accounting(app, db, data):
 #            print "Invalid instance_id format:", data_id
         if len(i) > 2:
             traffic = i[2]
-            print data_id, "-->", instance_uuid, "\033[1;32m", traffic, "\033[0m"
+            print data_id, "-->", instance_uuid, "\033[1;32m", traffic, i[1], "\033[0m"
             db.insert('vmnetwork', instance_uuid, {"total": {i[1]: traffic}})
     print 'spend \033[1;33m%f\033[0m seconds' % (time.time() - pass_time)
 

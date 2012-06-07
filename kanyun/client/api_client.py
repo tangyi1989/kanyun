@@ -156,6 +156,14 @@ class ApiClient():
         r_msg_type, r_msg_uuid, r_msg_body = self.socket.recv_multipart()
         result = json.loads(r_msg_body)
         return result
+    def get_data(self, msg):
+        msg_type = 'kanyun'
+        msg_uuid = str(uuid.uuid4())
+        self.socket.send_multipart([msg_type, msg_uuid,
+                                     json.dumps(msg)])
+        r_msg_type, r_msg_uuid, r_msg_body = self.socket.recv_multipart()
+        result = json.loads(r_msg_body)
+        return result
     def list_instaces(self, metric):
         data = PROTOCOL_REQUEST
         data['method'] = "list_instance"

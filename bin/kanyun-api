@@ -30,15 +30,24 @@ from kanyun.server import api_server
 
 from kanyun.database.cassadb import CassaDb
 
-def on_message_receive(api, method, arg):
+def on_message_receive(api, method, args):
     if method == 'query_usage_report':
         print '*' * 60
-        print "query_usage_report:", msg['args']
+        print "query_usage_report:", args
 
-        (rs, count, _) = api.query_usage_report(msg['args'], **(msg['args']))
+        (rs, count, _) = api.query_usage_report(args, **args)
+        return rs
+    elif method == 'get_data':
+        row_id = args['id']
+        cf_str = args['metric']
+        scf_str = args.setdefault("metric_param", "total")
+        time_from = int(args['timestamp_from'])
+        time_to = int(args['timestamp_to'])
+        print '*' * 60
+        rs, _, _ = api.get_data(row_id, cf_str, scf_str, time_from, time_to)
         return rs
     elif method == 'list_instance':
-        cf_str = arg['metric']
+        cf_str = args['metric']
         rs = api.get_instances_list(cf_str)
         return rs
     elif method == 'update_alert_policy':
@@ -67,14 +76,15 @@ if __name__ == '__main__':
         try:
             data = dict()
             msg = json.loads(message)
-            if not msg.has_key('method') or not msg.has_key("args"):
+            method = msg.setdefault("method", None)
+            args = msg.setdefault("args", None)
+            if method is None or args is None:
                 socket.send_multipart([msg_type, msg_uuid, json.dumps(data)])
                 continue
-            logger.info(msg['method'] + str(msg['args']))
-            data = on_message_receive(api, msg['method'], msg['args'])
+            logger.info(str(method) + str(args))
+            data = on_message_receive(api, method, args)
             if data is None:
                 data = dict()
-            print "response:", data
             resp = {'code': 200,
                     'message': 'Success',
                     'data': data,

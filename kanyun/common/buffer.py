@@ -51,11 +51,11 @@ class HallBuffer():
         new = dict()
         for key, i in self.buf.iteritems():
             count += 1
-            print i
+            #print i
             if count > max_count:
                 break;
             if (time.time() - i[3] < time_out):
-                print "\t", time.time(),"-", i[3],"<",time_out
+                #print "\t", time.time(),"-", i[3],"<",time_out
                 new[key] = i
         self.buf = new
         
@@ -93,28 +93,29 @@ if __name__ == '__main__':
     
     b = HallBuffer()
     key = str(params)
-    print "Hit rate=", b.get_hit_rate(key), "of", len(b.buf)
+    #print "Hit rate=", b.get_hit_rate(key), "of", len(b.buf)
     
     if b.hit_test(key):
-        print b.get_buf(key)
+        #print b.get_buf(key)
         assert False
     else:
         b.save(key, data)
         time.sleep(3)
         b.save(str(params2), data2)
-        print "not hit."
-    print "Hit rate=", b.get_hit_rate(key), "of", len(b.buf)
+        #print "not hit."
+    #print "Hit rate=", b.get_hit_rate(key), "of", len(b.buf)
         
     if b.hit_test(key):
-        print "hit!"
-        print "\t", b.get_buf(key)
+        #print "hit!"
+        #print "\t", b.get_buf(key)
+        pass
     else:
         b.save(key, data)
         assert False
-    print "Hit rate=", b.get_hit_rate(key), "of", len(b.buf)
+    #print "Hit rate=", b.get_hit_rate(key), "of", len(b.buf)
     
     assert len(b.buf) == 2
     
     b.cleanup(time_out = 1)
-    print "after cleanup, Hit rate=", b.get_hit_rate(key), "of", len(b.buf)
+    #print "after cleanup, Hit rate=", b.get_hit_rate(key), "of", len(b.buf)
     assert len(b.buf) == 1

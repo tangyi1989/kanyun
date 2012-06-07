@@ -23,6 +23,7 @@ import ConfigParser
 import json
 import zmq
 from collections import OrderedDict
+from datetime import datetime
 
 from kanyun.client import api_client
 from kanyun.common import const
@@ -32,28 +33,38 @@ def show_result(rs):
     if rs is None:
         return
     print rs
-    if rs.has_key("data"):
-        rs = rs['data']
-        if rs is None:
-            return
-        for k, i in rs.iteritems():
-            print "{%s:%s}" % (k, i)
-        print "%d results" % (len(rs))
-        print "spend", time.clock(), "seconds"
+    rs = rs.setdefault("data", None)
+    if rs is None:
+        return
+    for k, i in rs.iteritems():
+        print "{%s:%s}" % (k, i)
+    print "%d results" % (len(rs))
+    print "spend", time.clock(), "seconds"
 
+def show_data(rs, row_id, cf_str, scf_str):
+    if rs is None:
+        return
+    rs = rs.setdefault("data", None)
+    if rs is None:
+        return
+        
+    for i in rs:
+        print i
+    print "%d results of key=%s,cf=%s,scf=%s" % (len(rs), row_id, cf_str, scf_str)
+    print "spend", time.clock(), "seconds"
     
 def show_result2(rs, row_id, cf_str, scf_str):
     if rs is None:
         return
-    print rs
-    if rs.has_key("data"):
-        rs = rs['data']
-        if rs is None:
-            return
-        for k, i in rs.iteritems():
-            print "{%s:%s}" % (k, i)
-        print "%d results of key=%s,cf=%s,scf=%s" % (len(rs), row_id, cf_str, scf_str)
-        print "spend", time.clock(), "seconds"
+    rs = rs.setdefault("data", None)
+    if rs is None or rs.items is None:
+        return
+    rs = OrderedDict(sorted(rs.items(), key=lambda t: t[0]))
+    for k, i in rs.iteritems():
+        timestr = datetime.fromtimestamp(float(k)).isoformat()
+        print "%s(%s):%s" % (k, timestr, i)
+    print "%d results of key=%s,cf=%s,scf=%s" % (len(rs), row_id, cf_str, scf_str)
+    print "spend", time.clock(), "seconds"
 
 def main():
     if len(sys.argv) == 2:
@@ -61,8 +72,10 @@ def main():
             print "usage:"
             print "\tapi_client"
             print "\tapi_client -l <metric>"
-            print "\tapi_client <id> vmnetwork <IP> <option> <period> " \
-                   "<time_from> <time_to>"
+            print "\tapi_client -t <timestamp>"
+#            print "\tapi_client <id> vmnetwork <IP> <option> <period> " \
+#                   "<time_from> <time_to>"
+            print "\tapi_client -get <id> <cf> <scf> <time_from> <time_to>"
             print "\tapi_client <id> <cf> <scf> <option> <period> " \
                    "<time_from> <time_to>"
             print "option:"
@@ -90,6 +103,9 @@ def main():
             metric = sys.argv[2]
             rs = apiclient.list_instaces(metric=metric)
             show_result(rs)
+        elif sys.argv[1] == '-t':
+            timestamp = float(sys.argv[2])
+            print datetime.fromtimestamp(timestamp).isoformat()
         return
     elif len(sys.argv) == 8:
         row_id, cf_str, scf_str = sys.argv[1], sys.argv[2], sys.argv[3]
@@ -109,6 +125,21 @@ def main():
                                     })
         show_result2(rs, row_id=row_id, cf_str=cf_str, scf_str=scf_str)
         return
+    elif len(sys.argv) == 7:
+        if sys.argv[1] == '-get':
+            row_id, cf_str, scf_str = sys.argv[2], sys.argv[3], sys.argv[4]
+            time_from, time_to = sys.argv[5], sys.argv[6]
+            rs = apiclient.get_data({
+                                    'method': 'get_data',
+                                    'args': {
+                                        'id': row_id,
+                                        'metric': cf_str,
+                                        'metric_param': scf_str,
+                                        'timestamp_from': time_from,
+                                        'timestamp_to': time_to,
+                                        }
+                                    })
+            show_data(rs, row_id=row_id, cf_str=cf_str, scf_str=scf_str)
     else:
         rs = apiclient.query_usage_report({
                                         'method': 'query_usage_report',

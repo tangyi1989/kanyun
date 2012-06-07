@@ -84,16 +84,9 @@ class Worker:
         self.app = App(conf="kanyun.conf")
         self.logger = self.app.get_logger()
         self.cfg = self.app.get_cfg('worker')
-        server_host = '127.0.0.1'
-        server_port = "5551"
-        self.worker_id = worker_id
-        
-        if worker_id is None and self.cfg.has_key('id'):
-            self.worker_id = self.cfg['id']
-        if self.cfg.has_key('dataserver_host'):
-            server_host = self.cfg['dataserver_host']
-        if self.cfg.has_key('dataserver_port'):
-            server_port = self.cfg['dataserver_port']
+        self.worker_id = self.cfg.setdefault('id', worker_id)
+        server_host = self.cfg.setdefault('dataserver_host', '127.0.0.1')
+        server_port = self.cfg.setdefault('dataserver_port', "5551")
             
         ctx = None
         if context is None:
