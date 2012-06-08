@@ -25,6 +25,7 @@ import logging
 import traceback
 import ConfigParser
 
+from nova import utils
 from kanyun.common.app import *
 from kanyun.common.const import *
 """
@@ -35,7 +36,7 @@ protocol:
 # plugin
 def plugin_heartbeat(worker_id, status=1):
     """status: 0:I will exit; 1:working"""
-    info = [worker_id, time.time(), status]
+    info = [worker_id, utils.utcnow_ts(), status]
     return MSG_TYPE.HEART_BEAT, info
     
     
@@ -159,7 +160,7 @@ class Worker:
         return True
         
     def end(self):
-        info = [self.worker_id, time.time(), 0]
+        info = [self.worker_id, utils.utcnow_ts(), 0]
         self.send(MSG_TYPE.HEART_BEAT, 0, json.dumps(info))
     
 

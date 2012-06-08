@@ -24,6 +24,7 @@ import json
 import zmq
 from collections import OrderedDict
 from datetime import datetime
+from dateutil.parser import parse
 
 from kanyun.client import api_client
 from kanyun.common import const
@@ -73,6 +74,7 @@ def main():
             print "\tapi_client"
             print "\tapi_client -l <metric>"
             print "\tapi_client -t <timestamp>"
+            print "\tapi_client -d <timestring>"
 #            print "\tapi_client <id> vmnetwork <IP> <option> <period> " \
 #                   "<time_from> <time_to>"
             print "\tapi_client -get <id> <cf> <scf> <time_from> <time_to>"
@@ -106,6 +108,11 @@ def main():
         elif sys.argv[1] == '-t':
             timestamp = float(sys.argv[2])
             print datetime.fromtimestamp(timestamp).isoformat()
+        elif sys.argv[1] == '-d':
+            timesstr = sys.argv[2]
+            timestamp = parse(timesstr)
+            timestamp = int(time.mktime(timestamp.timetuple()))
+            print timestamp
         return
     elif len(sys.argv) == 8:
         row_id, cf_str, scf_str = sys.argv[1], sys.argv[2], sys.argv[3]

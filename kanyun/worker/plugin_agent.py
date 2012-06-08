@@ -21,6 +21,8 @@ import time
 from xml.etree import ElementTree
 
 import libvirt
+from nova import utils
+
 """
 collect info of vm
 """
@@ -102,7 +104,7 @@ class LibvirtMonitor(object):
 
     @staticmethod
     def get_utc_sec():
-        return time.time()
+        return utils.utcnow_ts()
 
     @staticmethod
     def get_xml_nodes(dom_xml, path):

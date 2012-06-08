@@ -26,6 +26,8 @@ import ConfigParser
 import zmq
 from dateutil.parser import parse
 from collections import OrderedDict
+
+from nova import utils
 from kanyun.common.const import *
 from kanyun.common.buffer import HallBuffer
 from kanyun.database.cassadb import CassaDb
@@ -139,7 +141,7 @@ class ApiServer():
             return None, 0, True
             
         if time_to == 0:
-            time_to = int(time.time())
+            time_to = int(utils.utcnow_ts())
         print "get_data:", row_id, cf_str, scf_str, time_from, time_to
         
         bufkey = str([row_id, cf_str, scf_str, time_from, time_to])
@@ -208,7 +210,7 @@ class ApiServer():
             return None
         ret = list()
         limit = 20000
-        time_to = int(time.time())
+        time_to = int(utils.utcnow_ts())
         time_from = time_to - 24 * 60 * 60
         db = self.get_db()
         
@@ -286,7 +288,7 @@ class ApiServer():
 #        time_from = int(time.mktime(time_from.timetuple()))
         time_from = parse(timestamp_from)
         time_from = int(time.mktime(time_from.timetuple()))
-        time_to = int(time.time())
+        time_to = int(utils.utcnow_ts())
         if not timestamp_to is None:
 #            time_to = iso8601.parse_date(timestamp_to)
 #            time_to = int(time.mktime(time_to.timetuple()))
@@ -318,7 +320,7 @@ class ApiServer():
             ret_len = 0
             
         result = ret, ret_len, all_data
-        if (not result is None and time.time() - time_to > 120):
+        if (not result is None and utils.utcnow_ts() - time_to > 120):
             self.buf.cleanup()
             self.buf.save(bufkey, result)
         return result

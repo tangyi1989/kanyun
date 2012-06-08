@@ -19,6 +19,7 @@
 import subprocess
 import shlex
 import time
+from nova import utils
 
 """
 A worker plugin run in nova-network node, get the network traffic.
@@ -112,7 +113,7 @@ def get_traffic_accounting_info():
         # save current value
         _ip_bytes[instance_id] = float(out_bytes)
 
-        ret[instance_id] = (instance_ip, int(time.time()), str(val))
+        ret[instance_id] = (instance_ip, int(utils.utcnow_ts()), str(val))
 
     return ret
 
