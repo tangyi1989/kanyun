@@ -25,6 +25,10 @@ import ConfigParser
 import json
 import zmq
 
+from nova import flags
+from nova.notifier import api as notifier
+from nova import utils
+
 from kanyun.database.cassadb import CassaDb
 import plugin_agent_srv
 from kanyun.common.const import *
@@ -79,6 +83,10 @@ class LivingStatus():
         print '*' * 400
         print '[WARNING]worker', self.worker_id, "is dead. email sendto admin"
         print '*' * 400
+        payload = dict()
+        payload['host'] = FLAGS.my_ip
+        payload['message'] = 'kanyun-worker is dead'
+        notifier.notify(notifier.publisher_id('compute'),'kanyun.worker',notifier.WARN, payload)
         self.alerted = True
         
     def alert(self):

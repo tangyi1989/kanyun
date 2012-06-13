@@ -24,6 +24,11 @@ import traceback
 import ConfigParser
 import json
 import zmq
+
+from nova import context
+from nova import flags
+from nova import utils
+
 from kanyun.common.app import *
 from kanyun.server import data_server
 from kanyun.server.data_server import MSG_TYPE
@@ -39,6 +44,8 @@ running = True
 config = ConfigParser.ConfigParser()
 
 if __name__ == '__main__':
+    utils.default_flagfile()
+    flags.FLAGS(sys.argv)
     # register_plugin
     plugins = dict()
     plugins[MSG_TYPE.HEART_BEAT] = data_server.plugin_heartbeat
