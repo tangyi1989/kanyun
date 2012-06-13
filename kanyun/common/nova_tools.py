@@ -23,7 +23,7 @@ import ConfigParser
 import json
 from collections import OrderedDict
 from sqlalchemy import *
-from sqlalchemy.orm import sessionmaker
+#from sqlalchemy.orm import sessionmaker
 
 from kanyun.common.app import *
 
