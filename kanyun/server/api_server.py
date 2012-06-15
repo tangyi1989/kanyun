@@ -163,7 +163,7 @@ class ApiServer():
         """[private func]analyize the data
         period: minutes
         return: {"key":"value"}
-        note: timestmp is already UTC time, so do NOT use time.gmtime again
+        note: timestmp is already UTC time, so do NOT use time.gmtime again!
         """
         if rs is None \
             or not isinstance(period, int):

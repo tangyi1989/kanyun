@@ -131,7 +131,7 @@ class TestLibvirtMonitorMox(unittest.TestCase):
     def test_get_utc_sec(self):
 #        self.a.get_utc_sec(test_a)
         utc_sec = self.a.get_utc_sec()
-        self.assertTrue(time.time() - 1 < utc_sec < time.time())
+        self.assertTrue(time.time() > utc_sec + 60*60)
 
     def test_get_devs(self):
         # make sure the shuffled sequence does not lose any elements
