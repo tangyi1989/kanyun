@@ -57,7 +57,7 @@ if __name__ == '__main__':
     autotasks.append(data_server.autotask_heartbeat)
     # 
 
-    app = App(conf="kanyun.conf", log="/tmp/kanyun-server.log")
+    app = App(conf="kanyun.conf", name="server")
     logger = app.get_logger()
     cfg = app.get_cfg('server')
     

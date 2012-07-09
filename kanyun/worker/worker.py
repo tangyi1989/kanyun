@@ -82,7 +82,7 @@ class Worker:
         self.plugins = list()
         self.last_work_min = None # this value is None until first update
         self.update_time()
-        self.app = App(conf="kanyun.conf")
+        self.app = App(conf="kanyun.conf", name="worker")
         self.logger = self.app.get_logger()
         self.cfg = self.app.get_cfg('worker')
         self.worker_id = self.cfg.setdefault('id', worker_id)

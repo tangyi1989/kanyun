@@ -60,7 +60,7 @@ def on_message_receive(api, method, args):
 
 
 if __name__ == '__main__':
-    app = App(conf="kanyun.conf", log="/tmp/kanyun-api.log")
+    app = App(conf="kanyun.conf", name="api")
     logger = app.get_logger()
     cfg = app.get_cfg('api')
     

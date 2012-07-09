@@ -20,7 +20,6 @@ import sys
 import time
 import types
 import json
-import logging
 import traceback
 import ConfigParser
 import zmq
@@ -118,10 +117,6 @@ class ApiServer():
         self.db = None
         self.db_host = db_host
         self.buf = HallBuffer()
-        self.logger = logging.getLogger()
-        handler = logging.FileHandler(log_file)
-        self.logger.addHandler(handler)
-        self.logger.setLevel(log_level)
         
     def get_db(self):
         if self.db is None:

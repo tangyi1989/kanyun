@@ -85,7 +85,7 @@ class NovaTools():
         return None
         
 if __name__ == '__main__':
-    app = App(conf="/etc/nova/nova.conf", log='/tmp/kanyun.log')
+    app = App(conf="/etc/nova/nova.conf", name='kanyun')
     tool = NovaTools(app)
     rs = tool.get_instances(uuid='76d6f296-68b8-4a21-9a20-9f46ff48d6ef')
     print rs

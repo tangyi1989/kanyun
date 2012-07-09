@@ -42,7 +42,7 @@ protocol:
 """
 living_status = dict()
 
-app = App(conf="kanyun.conf", log="/tmp/kanyun-server.log")
+app = App(conf="kanyun.conf", name="server")
 logger = app.get_logger()
 #tool = None
 tool = NovaTools(app)

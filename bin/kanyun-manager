@@ -84,7 +84,7 @@ def main():
             show_usage()
             return
     
-    app = App(conf="kanyun.conf", log='/tmp/kanyun.log')
+    app = App(conf="kanyun.conf", name='kanyun')
     
     if len(sys.argv) == 2:
         if sys.argv[1] == '-n':
