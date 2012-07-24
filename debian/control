@@ -1,0 +1,38 @@
+Source: kanyun
+Section: net
+Priority: extra
+Maintainer: Tang Yaguang <yaguang@staff.sina.com.cn>
+Build-Depends: debhelper (>= 8.0.0)
+Standards-Version: 3.9.2
+Homepage: https://git.sws.sina.com.cn/kanyun
+#Vcs-Git: git://git.debian.org/collab-maint/kanyun.git
+#Vcs-Browser: http://git.debian.org/?p=collab-maint/kanyun.git;a=summary
+
+Package: kanyun
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: sina sws virtual machine monitor
+ sina sws virtual machine monitor
+
+Package: kanyun-common
+Architecture: all
+Depends: cassandra
+Description: kanyun-common
+ sina sws kanyun-common
+
+Package: kanyun-api
+Architecture: all
+Depends: kanyun-common
+Description: kanyun-api
+ sina sws kanyun-api
+
+Package: kanyun-worker
+Architecture: all
+Description: kanyun-worker
+ sina sws kanyun-worker
+
+Package: kanyun-server
+Architecture: all
+Depends: kanyun-common
+Description: kanyun-server
+ sina sws kanyun-server

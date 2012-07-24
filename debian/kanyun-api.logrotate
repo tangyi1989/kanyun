@@ -1,0 +1,4 @@
+/var/log/kanyun/kanyun-api.log{
+daily
+rotate 15
+}

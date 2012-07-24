@@ -8,22 +8,22 @@ sql_connection: <copy from /etc/nova/nova.conf>
 host: *
 port: 5551
 db_host: 127.0.0.1
-log: /tmp/kanyun-server.log
+log: /var/log/kanyun/kanyun-server.log
 
 [api]
 api_host: *
 api_port: 5556
 db_host: 127.0.0.1
-log: /tmp/kanyun-api.log
+log: /var/log/kanyun/kanyun-api.log
 
 [worker]
 id: worker1
 worker_timeout: 60
 dataserver_host: 127.0.0.1
 dataserver_port: 5551
-log: /tmp/kanyun-worker.log
+log: /var/log/kanyun/kanyun-worker.log
 
 [client]
 api_host: 127.0.0.1
 api_port: 5556
-log: /tmp/kanyun-client.log
+log: /var/log/kanyun/kanyun-client.log

@@ -1,0 +1,3 @@
+usr/lib/python*/dist-packages/*
+bin/kanyun-manager /usr/bin
+etc/kanyun.conf.example /etc/kanyun/
