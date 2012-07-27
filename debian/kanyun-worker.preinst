@@ -1,0 +1,14 @@
+#!/bin/sh -e
+
+if [ "$1" = "configure" ]; then
+    if ! getent group kanyun> /dev/null 2>&1; then
+        addgroup --system kanyun>/dev/null
+    fi
+    if ! getent passwd kanyun> /dev/null 2>&1; then
+        mkdir -p /var/lib/kanyun
+        adduser --system --home /var/lib/kanyun --ingroup kanyun --no-create-home --shell /bin/false kanyun
+    fi
+fi
+mkdir -p /var/log/kanyun
+mkdir -p /etc/kanyun
+chown -R kanyun:kanyun /var/log/kanyun /etc/kanyun/ /var/lib/kanyun

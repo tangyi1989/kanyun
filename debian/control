@@ -28,6 +28,7 @@ Description: kanyun-api
 
 Package: kanyun-worker
 Architecture: all
+Depends: libzmq1,python-zmq
 Description: kanyun-worker
  sina sws kanyun-worker
 
