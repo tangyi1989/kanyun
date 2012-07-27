@@ -1,4 +1,4 @@
 [gerrit]                                                                                                                               
-host=10.210.228.21
+host=gerrit.sinasws.com
 port=29418
 project=kanyun.git
