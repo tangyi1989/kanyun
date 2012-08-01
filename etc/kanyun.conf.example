@@ -12,7 +12,7 @@ log: /var/log/kanyun/kanyun-server.log
 
 [api]
 api_host: *
-api_port: 5556
+api_port: 5552
 db_host: 127.0.0.1
 log: /var/log/kanyun/kanyun-api.log
 
@@ -25,5 +25,5 @@ log: /var/log/kanyun/kanyun-worker.log
 
 [client]
 api_host: 127.0.0.1
-api_port: 5556
+api_port: 5552
 log: /var/log/kanyun/kanyun-client.log
