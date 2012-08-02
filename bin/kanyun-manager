@@ -12,22 +12,21 @@
 #         http://www.apache.org/licenses/LICENSE-2.0
 #
 #    Unless required by applicable law or agreed to in writing, software
-#    distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+#    distributed under the License isALL=(ALL:ALL) ALL distributed on an "AS IS" BASIS, WITHOUT
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
 import sys
 import time
-import ConfigParser
-import json
-from collections import OrderedDict
-
-from kanyun.worker.worker import *
-from kanyun.worker.plugin_traffic_accounting import *
+from kanyun.worker.plugin_traffic_accounting import get_traffic_accounting_info
 from kanyun.worker import plugin_agent
-from kanyun.common.nova_tools import *
-from kanyun.common.app import *
+from kanyun.server.plugin_agent_srv import plugin_decoder_agent
+from kanyun.common.nova_tools import NovaTools
+from kanyun.common.app import App
+from kanyun.database.cassadb import CassaDb
+import random
+
 
 def show_usage():
     print "usage:"
@@ -37,8 +36,11 @@ def show_usage():
     print "\t  -vm  : list virtualmachine info, option=time-interval"
     print "\t  -vi <id> : get vm info"
     print "\t  -cmd <instance_id> <instance_ip> <public_interface>"
+    print "\t  -data <count> <instance-id>"
     print "example:"
-    print "\t kanyun -vi instance-00000166"
+    print "\t kanyun-manager -vi instance-00000166"
+    print "\t kanyun-manager -data 9 instance-00000017"
+
 
 def vm(interval=60):
     while True:
@@ -46,7 +48,8 @@ def vm(interval=60):
         if not info is None and len(info) > 0:
             print info
         time.sleep(interval)
-    
+
+
 def network(interval=60):
     while True:
         for k, info in get_traffic_accounting_info().iteritems():
@@ -54,12 +57,14 @@ def network(interval=60):
 
         time.sleep(interval)
 
+
 def vminfo(app, instanceid):
     tool = NovaTools(app)
     id = tool.get_id(instanceid)
     rs = tool.get_instances(id=id)
     return rs
-    
+
+
 def show_iptables_cmd(instance_id, instance_ip, public_interface):
     cmd1 = """sudo iptables -t filter -N nova-compute-f-inst-%s"""
     cmd2 = """sudo iptables -I FORWARD -s %s -j nova-compute-f-inst-%s"""
@@ -68,6 +73,28 @@ def show_iptables_cmd(instance_id, instance_ip, public_interface):
     print cmd2 % (instance_ip, instance_id)
     print cmd3 % (instance_id, public_interface, instance_id, instance_ip)
     print "Use 'sudo iptables -n -L|grep Chain|grep nova-compute' to look the policy."
+
+
+def create_test_data(app, count=1, key="instance-00000001@pyw.novalocal"):
+    # insert test data
+    cfg = app.get_cfg('server')
+    tool = NovaTools(app)
+    db = CassaDb('data', cfg['db_host'])
+
+    for i in range(0, count):
+        data = {key:
+            [
+            ["cpu", "total", [1343794332, random.randint(0, 100)]],
+            ["mem", "total", [1343794332, 131072, 131072]],
+            ["nic", "vnet0", [1343794332, 21795245, 5775663]],
+            ["blk", "vda", [1343794332, 474624, 4851712]],
+            ["blk", "vdb", [1343794332, 122880, 0]]
+            ]
+        }
+
+        plugin_decoder_agent(tool, db, data)
+    #plugin_traffic_accounting(app, db, data)
+
 
 def main():
     if len(sys.argv) == 1:
@@ -83,9 +110,9 @@ def main():
         elif sys.argv[1] in ["?"]:
             show_usage()
             return
-    
+
     app = App(conf="kanyun.conf", name='kanyun')
-    
+
     if len(sys.argv) == 2:
         if sys.argv[1] == '-n':
             network(interval=60)
@@ -93,7 +120,14 @@ def main():
     if sys.argv[1] == '-vm':
             vm(interval=60)
             return
-            
+    if sys.argv[1] == '-data':
+        key = None
+        count = 1
+        if len(sys.argv) > 2:
+            count = int(sys.argv[2])
+        if len(sys.argv) > 3:
+            key = sys.argv[3]
+        create_test_data(app, count=count, key=key)
     elif len(sys.argv) == 3:
         option = sys.argv[2]
         if sys.argv[1] == '-n':
@@ -115,11 +149,12 @@ def main():
             instance_ip = sys.argv[3]
             public_interface = sys.argv[4]
             show_iptables_cmd(
-                            instance_id=instance_id, 
-                            instance_ip=instance_ip, 
+                            instance_id=instance_id,
+                            instance_ip=instance_ip,
                             public_interface=public_interface)
     else:
         pass
-    
+
+
 if __name__ == '__main__':
     main()

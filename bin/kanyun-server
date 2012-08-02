@@ -51,16 +51,16 @@ if __name__ == '__main__':
     plugins[MSG_TYPE.HEART_BEAT] = data_server.plugin_heartbeat
     plugins[MSG_TYPE.TRAFFIC_ACCOUNTING] = data_server.plugin_decoder_traffic_accounting
     plugins[MSG_TYPE.AGENT] = data_server.plugin_decoder_agent
-    
+
     # register autotask
     autotasks = list()
     autotasks.append(data_server.autotask_heartbeat)
-    # 
+    #
 
     app = App(conf="kanyun.conf", name="server")
     logger = app.get_logger()
     cfg = app.get_cfg('server')
-    
+
     data_server.register_signal()
     context = zmq.Context()
 
@@ -80,15 +80,15 @@ if __name__ == '__main__':
             socks = dict(poller.poll(20000))
         except zmq.core.error.ZMQError:
             pass
-        
+
         # parse the data from worker and save to database
         if socks.get(socket) == zmq.POLLIN:
             try:
                 msg_type, report = socket.recv_multipart()
             except zmq.core.error.ZMQError:
                 pass
-            
-            if plugins.has_key(msg_type) and len(report) > 0:
+
+            if msg_type in plugins and len(report) > 0:
                 report_str = ''.join(report)
 #                print 'recv(%s):%s' % (msg_type, report_str)
                 data = json.loads(report_str)
@@ -98,6 +98,6 @@ if __name__ == '__main__':
                     traceback.print_exc()
             else:
                 print 'invaild data(%s):%s' % (msg_type, report_str)
-            
+
         for task in autotasks:
             task()

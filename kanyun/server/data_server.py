@@ -16,20 +16,11 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import sys
 import time
 import signal
-import traceback
-import logging
-import ConfigParser
-import json
-import zmq
 
-from nova import flags
 from nova.notifier import api as notifier
-from nova import utils
 
-from kanyun.database.cassadb import CassaDb
 import plugin_agent_srv
 from kanyun.common.const import *
 from kanyun.common.app import *
@@ -47,48 +38,49 @@ logger = app.get_logger()
 #tool = None
 tool = NovaTools(app)
 
+
 class LivingStatus():
 
     def __init__(self, worker_id='1'):
         self.dietv = 2 * 60  # default die threshold value: 2min
-        self.alert_interval = 60 # one alert every 60 seconds
+        self.alert_interval = 60  # one alert every 60 seconds
         self.update()
         self.alerted = False
         self.worker_id = worker_id
         self.previous_alert_time = 0
-        
+
     def update(self):
         self.update_time = time.time()
         self.alerted = False
-        
+
     def is_die(self):
         return time.time() - self.update_time > self.dietv
-        
+
     def on_die(self):
         ret = 0
         if not self.alerted:
-            self.alert_once()
             ret += 1
-            
+            self.alert_once()
+
         # each minutes less than once
-        if time.time() - self.previous_alert_time > self.alert_interval: 
+        if time.time() - self.previous_alert_time > self.alert_interval:
             self.alert()
             ret += 1
-            
+
         return ret
-        
+
     ####### private ########
     def alert_once(self):
-        # TODO: dispose timeout worker here 
+        # TODO: dispose timeout worker here
         print '*' * 400
         print '[WARNING]worker', self.worker_id, "is dead. email sendto admin"
         print '*' * 400
         payload = dict()
         payload['host'] = FLAGS.my_ip
         payload['message'] = 'kanyun-worker is dead'
-        notifier.notify(notifier.publisher_id('compute'),'kanyun.worker',notifier.WARN, payload)
+        notifier.notify(notifier.publisher_id('compute'), 'kanyun.worker', notifier.WARN, payload)
         self.alerted = True
-        
+
     def alert(self):
         print '\033[0;31m[WARNING]\033[0mworker', self.worker_id, "is dead. Total=", len(living_status)
         self.previous_alert_time = time.time()
@@ -98,13 +90,16 @@ def autotask_heartbeat():
     global living_status
     for worker_id, ls in living_status.iteritems():
         if ls.is_die():
-            ls.on_die()
+            try:
+                ls.on_die()
+            except Exception, e:
+                print e
 
 
 def clean_die_warning():
     global config
     global living_status
-    
+
     new_list = dict()
     i = 0
     for worker_id, ls in living_status.iteritems():
@@ -115,32 +110,34 @@ def clean_die_warning():
 
     living_status = new_list
     print i, "workers cleaned:"
-    
-    
+
+
 def list_workers():
     global living_status
-    print "-"*30, "list_workers", "-" * 30
+    print "-" * 30, "list_workers", "-" * 30
     for worker_id, ls in living_status.iteritems():
         print 'worker', worker_id, "update @", ls.update_time
     print len(living_status), "workers."
 
 
 def get_prefix(data, s='@'):
-    try: 
+    try:
         prefix = data.split(s)[0]
         return prefix
     except Exception, e:
         print Exception, e
-        
+
     return None
-    
+
+
 def isnum_prefix(data):
     ret = get_prefix(data, "@")
     try:
-        _ = int(ret)
+        int(ret)
     except:
         return False
     return True
+
 
 def check_id(data):
     # 1.test format
@@ -155,9 +152,10 @@ def check_id(data):
         instance_uuid = data
 #    # 2-3 is '10.0.0.1' format
 #    instance_uuid = tool.get_uuid_by_ip(data_id)
-    
+
     return instance_uuid
-    
+
+
 def plugin_heartbeat(app, db, data):
     if data is None or len(data) < 3:
         logger.debug("[ERR]invalid heartbeat data")
@@ -176,25 +174,35 @@ def plugin_heartbeat(app, db, data):
 
 
 def plugin_decoder_agent(app, db, data):
+    """ data:'{"instance-00000001@pyw.novalocal":
+        [
+         ["cpu", "total", [1332831360.029795, 53522870000000]],
+         ["mem", "total", [1332831360.029795, 131072, 131072]],
+         ["nic", "vnet0", [1332831360.037399, 21795245, 5775663]],
+         ["blk", "vda", [1332831360.04699, 474624, 4851712]],
+         ["blk", "vdb", [1332831360.049333, 122880, 0]]
+        ]
+     }'
+    """
     if data is None or len(data) <= 0:
         logger.debug('invalid data:%s' % (data))
         return
-        
-    print "-"*30, "vminfo", "-" * 30
+
+    print "-" * 30, "vminfo", "-" * 30
     pass_time = time.time()
     plugin_agent_srv.plugin_decoder_agent(tool, db, data)
     print 'spend \033[1;33m%f\033[0m seconds' % (time.time() - pass_time)
 #    print '-' * 60
-    
-    
+
+
 def plugin_decoder_traffic_accounting(app, db, data):
     # protocol:{'instance-00000001': ('10.0.0.2', 1332409327, '0')}
     # verify the data
     if data is None or len(data) <= 0:
         logger.debug('invalid data:%s' % (data))
         return
-    
-    print "-"*30, "traffic", "-" * 30
+
+    print "-" * 30, "traffic", "-" * 30
     logger.debug('save traffic data:%s' % (data))
     pass_time = time.time()
 #    for i in data:
@@ -213,9 +221,10 @@ def plugin_decoder_traffic_accounting(app, db, data):
             db.insert('vmnetwork', instance_uuid, {"total": {i[1]: traffic}})
     print 'spend \033[1;33m%f\033[0m seconds' % (time.time() - pass_time)
 
+
 def SignalHandler(sig, id):
     global running
-    
+
     if sig == signal.SIGUSR1:
         list_workers()
     elif sig == signal.SIGUSR2:
@@ -228,4 +237,3 @@ def register_signal():
     signal.signal(signal.SIGUSR1, SignalHandler)
     signal.signal(signal.SIGUSR2, SignalHandler)
     signal.signal(signal.SIGINT, SignalHandler)
-   

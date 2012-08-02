@@ -35,7 +35,7 @@ def show_result(rs):
         return
     print rs
     rs = rs.setdefault("data", None)
-    if rs is None:
+    if rs is None or len(rs) == 0:
         return
     for k, i in rs.iteritems():
         print "{%s:%s}" % (k, i)
@@ -48,12 +48,12 @@ def show_data(rs, row_id, cf_str, scf_str):
     rs = rs.setdefault("data", None)
     if rs is None:
         return
-        
+
     for i in rs:
         print i
     print "%d results of key=%s,cf=%s,scf=%s" % (len(rs), row_id, cf_str, scf_str)
     print "spend", time.clock(), "seconds"
-    
+
 def show_result2(rs, row_id, cf_str, scf_str):
     if rs is None:
         return
@@ -89,17 +89,17 @@ def main():
                    "cpu total sum 5 " \
                    "2012-02-20T12:12:12 2012-06-20T12:12:12"
             return
-        
+
     config = ConfigParser.ConfigParser()
     if len(config.read("kanyun.conf"))==0:
         config.read("/etc/kanyun.conf")
     cfg = dict(config.items('client'))
-        
+
     context = zmq.Context()
 
     apiclient = api_client.ApiClient(cfg['api_host'], cfg['api_port'])
     time.clock()
-    
+
     if len(sys.argv) == 3:
         if sys.argv[1] == '-l':
             metric = sys.argv[2]
@@ -162,6 +162,6 @@ def main():
                                         })
         show_result2(rs, "instance-00000001@pyw.novalocal", "cpu", "total")
         return
-    
+
 if __name__ == '__main__':
     main()

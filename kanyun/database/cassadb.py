@@ -59,8 +59,9 @@ class CassaDb():
         return rs
 
     def get_range2(self, cf_str, row_count=None):
-        pool = pycassa.ConnectionPool("data")
-        cf = pycassa.ColumnFamily(pool, cf_str)
+        #pool = pycassa.ConnectionPool("data")
+        #cf = pycassa.ColumnFamily(pool, cf_str)
+        cf = pycassa.ColumnFamily(self.db, cf_str)
         return cf.get_range()
 
     def get(self, cf_str, key, super_column,

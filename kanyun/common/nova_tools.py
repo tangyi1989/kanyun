@@ -38,36 +38,36 @@ class NovaTools():
 
     def get_uuid_by_ip(self, ip):
         return None
-        
+
     def get_uuid_by_id(self, id):
         ret = self.get_instances(id=id)
         if ret is None:
             return None
-            
+
         return ret[1]
-        
+
     def get_uuid_by_novaid(self, instance):
         ret = self.get_id(instance)
         if ret is None:
             return None
-            
+
         ret = self.get_instances(id=ret)
         if ret is None:
             return None
-            
+
         return ret[1]
-        
+
     def get_id(self, instance):
-        if len(instance) < 17:
+        if instance is None or len(instance) < 17:
             return None
-            
+
         ret = None
         try:
             ret = int(instance[9:17], 16)
         except:
             ret = None
         return ret
-        
+
     def get_instances(self, uuid=None, id=None):
         "return format: (id, uuid, display_name) or None"
         if not uuid is None:
@@ -83,7 +83,7 @@ class NovaTools():
                 return None
             return (row[4], row[34], row[26])
         return None
-        
+
 if __name__ == '__main__':
     app = App(conf="/etc/nova/nova.conf", name='kanyun')
     tool = NovaTools(app)
